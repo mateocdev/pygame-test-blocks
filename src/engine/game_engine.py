@@ -1,6 +1,19 @@
+import pygame
+
+
 class GameEngine:
     def __init__(self) -> None:
+        pygame.init()
+        """Create the game window and the clock"""
+        self.screen = pygame.display.set_mode((640, 360), pygame.SCALED)
+        pygame.display.set_caption("Game Engine")
+
+        self.clock = pygame.time.Clock()
         self.is_running = False
+        """Set framerate"""
+        self.framerate = 60
+        """Set delta time"""
+        self.delta_time = 0
 
     def run(self) -> None:
         self._create()
@@ -19,13 +32,18 @@ class GameEngine:
         pass
 
     def _process_events(self):
-        pass
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.is_running = False
 
     def _update(self):
         pass
 
     def _draw(self):
-        pass
+        """Color the screen"""
+        self.screen.fill((0, 200, 128))
+        """Clean the screen"""
+        pygame.display.flip()
 
     def _clean(self):
-        pass
+        pygame.quit()
