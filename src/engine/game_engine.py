@@ -1,23 +1,48 @@
 import pygame
 import esper
+import json
 
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
 from src.create.prefab_creator import create_square
 
+window = open("assets/cfg/window.json")
+data = json.load(window)
+
+"""Read the square data from the json file"""
+square = open("assets/cfg/enemies.json")
+data_square = json.load(square)
+
+
+"""Read the square level data from the json file"""
+square_level = open("assets/cfg/level_01.json")
+data_square_level = json.load(square_level)
+
+
+spawn = open("assets/cfg/level_01.json")
+data_spawn = json.load(spawn)
+for i in data_spawn["enemy_spawn_events"]:
+    print(i["enemy_type"])
+
 
 class GameEngine:
     def __init__(self) -> None:
         pygame.init()
+
+        title = data.get("title")
+        size = data.get("size")
+        framerate = data.get("framerate")
+
         """Create the game window and the clock"""
-        self.screen = pygame.display.set_mode((640, 360), pygame.SCALED)
-        pygame.display.set_caption("Game Engine")
+        self.screen = pygame.display.set_mode(
+            (size.get("w"), size.get("h")), pygame.SCALED)
+        pygame.display.set_caption(title)
 
         self.clock = pygame.time.Clock()
         self.is_running = False
         """Set framerate"""
-        self.framerate = 60
+        self.framerate = framerate
         """Set delta time"""
         self.delta_time = 0
 
@@ -34,10 +59,10 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        create_square(self.ecs_world, pygame.Vector2(50, 50),
-                      pygame.Vector2(0, 0), pygame.Vector2(100, 100), pygame.Color(255, 255, 255))
-        create_square(self.ecs_world, pygame.Vector2(50, 250),
-                      pygame.Vector2(150, 300), pygame.Vector2(-200, 300), pygame.Color(255, 100, 100))
+        for i in data_square:
+            create_square(self.ecs_world, pygame.Vector2(
+                data_square[i]["size"]["x"], data_square[i]["size"]["y"]), pygame.Vector2(0, 0), pygame.Vector2(data_square[i]["velocity_min"], data_square[i]["velocity_max"]), pygame.Color(
+                data_square[i]["color"]["r"], data_square[i]["color"]["g"], data_square[i]["color"]["b"]))
 
     def _calculate_time(self):
         """Calculate delta time"""
@@ -53,8 +78,10 @@ class GameEngine:
         system_screen_bounce(self.ecs_world, self.screen)
 
     def _draw(self):
+        background = data.get("bg_color")
         """Color the screen"""
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(
+            (background.get("r"), background.get("g"), background.get("b")))
         system_rendering(self.ecs_world, self.screen)
 
         pygame.display.flip()
