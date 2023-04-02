@@ -1,11 +1,13 @@
 import pygame
 import esper
 import json
+from src.ecs.components.c_enemySpawner import CEnemySpawner
 
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
 from src.create.prefab_creator import create_square
+from src.ecs.systems.s_spawner import system_spawner
 
 window = open("assets/cfg/window.json")
 data = json.load(window)
@@ -16,14 +18,8 @@ data_square = json.load(square)
 
 
 """Read the square level data from the json file"""
-square_level = open("assets/cfg/level_01.json")
-data_square_level = json.load(square_level)
-
-
 spawn = open("assets/cfg/level_01.json")
 data_spawn = json.load(spawn)
-for i in data_spawn["enemy_spawn_events"]:
-    print(i["enemy_type"])
 
 
 class GameEngine:
@@ -59,10 +55,14 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        for i in data_square:
+        spawn_entity = self.ecs_world.create_entity()
+        self.ecs_world.add_component(spawn_entity, CEnemySpawner(
+            data_spawn["enemy_spawn_events"]))
+        """         for i in data_square:
             create_square(self.ecs_world, pygame.Vector2(
                 data_square[i]["size"]["x"], data_square[i]["size"]["y"]), pygame.Vector2(0, 0), pygame.Vector2(data_square[i]["velocity_min"], data_square[i]["velocity_max"]), pygame.Color(
-                data_square[i]["color"]["r"], data_square[i]["color"]["g"], data_square[i]["color"]["b"]))
+                data_square[i]["color"]["r"], data_square[i]["color"]["g"], data_square[i]["color"]["b"])) """
+        system_spawner(self.ecs_world, self.delta_time)
 
     def _calculate_time(self):
         """Calculate delta time"""
