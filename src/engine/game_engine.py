@@ -55,14 +55,12 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        spawn_entity = self.ecs_world.create_entity()
-        self.ecs_world.add_component(spawn_entity, CEnemySpawner(
-            data_spawn["enemy_spawn_events"]))
-        """         for i in data_square:
-            create_square(self.ecs_world, pygame.Vector2(
-                data_square[i]["size"]["x"], data_square[i]["size"]["y"]), pygame.Vector2(0, 0), pygame.Vector2(data_square[i]["velocity_min"], data_square[i]["velocity_max"]), pygame.Color(
-                data_square[i]["color"]["r"], data_square[i]["color"]["g"], data_square[i]["color"]["b"])) """
-        system_spawner(self.ecs_world, self.delta_time)
+        for i in data_spawn["enemy_spawn_events"]:
+            spawn_entity = self.ecs_world.create_entity()
+            self.ecs_world.add_component(spawn_entity, CEnemySpawner(
+                i["time"], i["enemy_type"], i["position"]))
+
+        system_spawner(self.ecs_world)
 
     def _calculate_time(self):
         """Calculate delta time"""
