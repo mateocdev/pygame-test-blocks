@@ -1,8 +1,9 @@
 import pygame
 import esper
 import json
-from src.ecs.components.c_enemySpawner import CEnemySpawner
+import time
 
+from src.ecs.components.c_enemySpawner import CEnemySpawner
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
@@ -58,13 +59,12 @@ class GameEngine:
         for i in data_spawn["enemy_spawn_events"]:
             spawn_entity = self.ecs_world.create_entity()
             self.ecs_world.add_component(spawn_entity, CEnemySpawner(
-                i["time"], i["enemy_type"], i["position"]))
-
-        system_spawner(self.ecs_world)
+                i["time"], i["enemy_type"], i["position"], len(data_spawn["enemy_spawn_events"]), data_spawn["enemy_spawn_events"]))
 
     def _calculate_time(self):
         """Calculate delta time"""
-        self.delta_time = self.clock.tick(self.framerate) / 1000
+        self.delta_time = self.clock.tick(self.framerate) / 1000.0
+        self.elapsed_time = round(pygame.time.get_ticks() / 1000.0, 1)
 
     def _process_events(self):
         for event in pygame.event.get():
@@ -72,6 +72,7 @@ class GameEngine:
                 self.is_running = False
 
     def _update(self):
+        system_spawner(self.ecs_world, self.elapsed_time)
         system_movement(self.ecs_world, self.delta_time)
         system_screen_bounce(self.ecs_world, self.screen)
 
